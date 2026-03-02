@@ -92,20 +92,6 @@ function initializePassport() {
       },
     ),
   );
-
-  // esto lo puedo sacar, ya que estoy usando JWT
-  passport.serializeUser((user, done) => {
-    return done(null, user._id);
-  });
-
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const user = await userModel.findById(id).lean();
-      return done(null, user);
-    } catch (error) {
-      return done(error);
-    }
-  });
 }
 
 export default initializePassport;
