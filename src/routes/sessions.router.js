@@ -1,46 +1,31 @@
 import { Router } from "express";
-import passport from "passport";
-import { generateToken, customPassportCall } from "../utils.js";
+import { customPassportCall } from "../utils.js";
+import { register, login, current, logout, adminTest, recoverPassword, resetPassword } from "../controllers/sessions.controller.js";
+import { isLoggedIn, checkAdmin } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 // 📝 REGISTER
 
-router.post("/register", customPassportCall("register"), (req, res) => {
-  if (!req.user) {
-    return res
-      .status(400)
-      .json({ error: "Error al registrar el usuario-El usuario ya existe" });
-  }
-  res
-    .status(200)
-    .json({ message: "Usuario registrado correctamente", user: req.user });
-});
+router.post("/register", customPassportCall("register"), register);
 
 // 🔑 LOGIN
 
-router.post("/login", customPassportCall("login"), (req, res) => {
-  if (!req.user) {
-    return res.status(400).json({ error: "Credenciales incorrectas" });
-  }
-  const token = generateToken(req.user);
-  const { password, ...userWithoutPassword } = req.user;
-
-  res.cookie("jwt", token, { httpOnly: true }).json({
-    message: "Usuario logueado correctamente",
-    user: userWithoutPassword,
-  });
-});
+router.post("/login", customPassportCall("login"), login);
 
 // 👤 CURRENT
-router.get("/current", customPassportCall("current"), (req, res) => {
-  const { password, ...userWithoutPassword } = req.user;
-  res.json({ user: userWithoutPassword });
-});
+router.get("/current", customPassportCall("current"), isLoggedIn, current);
 
 // 🚪 LOGOUT
-router.post("/logout", (req, res) => {
-  res.clearCookie("jwt").json({ message: "Logout exitoso" });
-});
+router.post("/logout", customPassportCall("current"), isLoggedIn, logout);
+
+// 🔐 ADMIN
+router.get("/admin-test", customPassportCall("current"), isLoggedIn, checkAdmin, adminTest);
+
+// 🔐 RECOVER PASSWORD
+router.post("/recover-password", recoverPassword);
+
+// 🔐 RESET PASSWORD
+router.post("/reset-password", resetPassword);
 
 export default router;

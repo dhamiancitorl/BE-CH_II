@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import passport from "passport";
+import { env } from "./config/env.js";
 
 const filePath = fileURLToPath(import.meta.url);
 const __dirname = dirname(filePath);
@@ -10,11 +11,11 @@ const __dirname = dirname(filePath);
 export default __dirname;
 
 export function generateToken(user) {
-  return jwt.sign(user, process.env.JWT_SECRET);
+  return jwt.sign(user, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN });
 }
 
 export function validateToken(token) {
-  return jwt.verify(token, process.env.JWT_SECRET);
+  return jwt.verify(token, env.JWT_SECRET);
 }
 
 export function hashPassword(password) {
